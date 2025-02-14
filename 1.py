@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 from scipy.linalg import lu
+from scipy.integrate import simpson as simps
 
 def f(x):
     return x**3 - x - 2
@@ -88,27 +89,44 @@ def graphical_method():
 def compare_methods():
     window = tk.Toplevel()
     window.title("Comparison of Root-Finding Methods")
-    
+    ttk.Label(window, text="Find the root of f(x)=x^3−x−2 in the interval").pack()
     ttk.Label(window, text="Enter interval [a, b]:").pack()
     interval_entry = ttk.Entry(window)
     interval_entry.pack()
     
-    def calculate():
+    def calculatebisect():
+        try:
+            a, b = map(float, interval_entry.get().split(','))
+            root_bisect, iter_bisect = bisection_method(a, b)
+            root_secant, iter_secant = secant_method(a, b)
+            if root_bisect is None or root_secant is None:
+                messagebox.showerror("Error", "Invalid interval or division by zero.")
+                return
+            
+            true_root = (root_bisect + root_secant) / 2
+            rel_error_bisect = abs((true_root - root_bisect) / true_root) if true_root != 0 else 0
+            rel_error_secant = abs((true_root - root_secant) / true_root) if true_root != 0 else 0
+            
+            result = (f"Bisection Method: Root = {root_bisect:.6f}, Iterations = {iter_bisect}, "
+                      f"Relative Error = {rel_error_bisect:.6e}\n")
+            
+            messagebox.showinfo("Results", result)
+        except:
+            messagebox.showerror("Error", "Enter a valid interval, e.g., 1,2")
+    def calculatesecant():
         try:
             a, b = map(float, interval_entry.get().split(','))
             root_bisect, iter_bisect = bisection_method(a, b)
             root_secant, iter_secant = secant_method(a, b)
             
-            if root_bisect is None or root_secant is None:
+            if root_secant is None:
                 messagebox.showerror("Error", "Invalid interval or division by zero.")
                 return
             
-            true_root = root_secant
-            rel_error_bisect = abs((true_root - root_bisect) / true_root) if true_root != 0 else 0
-            rel_error_secant = abs((true_root - root_secant) / true_root) if true_root != 0 else 0
+            true_root = (root_bisect + root_secant) / 2
+            rel_error_secant = abs((true_root - root_secant) / true_root)*100 if true_root != 0 else 0
             
-            result = (f"Bisection Method: Root = {root_bisect:.6f}, Iterations = {iter_bisect}, "
-                      f"Relative Error = {rel_error_bisect:.6e}\n"
+            result = (
                       f"Secant Method: Root = {root_secant:.6f}, Iterations = {iter_secant}, "
                       f"Relative Error = {rel_error_secant:.6e}")
             
@@ -116,12 +134,41 @@ def compare_methods():
         except:
             messagebox.showerror("Error", "Enter a valid interval, e.g., 1,2")
     
-    ttk.Button(window, text="Calculate", command=calculate).pack()
+    ttk.Button(window, text="Bisect", command=calculatebisect).pack()
+    ttk.Button(window, text="Secant", command=calculatesecant).pack()
+
+def gauss_seidel(A, b, x0, tol=1e-6, max_iterations=100):
+    n = len(A)
+    x = x0.copy()
+    
+    for k in range(max_iterations):
+        x_new = x.copy()
+        
+        for i in range(n):
+            sum1 = sum(A[i][j] * x_new[j] for j in range(i))
+            sum2 = sum(A[i][j] * x[j] for j in range(i + 1, n))
+            
+            if A[i][i] == 0:
+                raise ValueError("Zero diagonal element detected. Cannot proceed.")
+            
+            x_new[i] = (b[i] - sum1 - sum2) / A[i][i]
+        
+        if np.linalg.norm(x_new - x, ord=np.inf) < tol:
+            return x_new, k + 1  # Возвращаем решение и количество итераций
+        
+        x = x_new
+    
+    raise ValueError("Gauss-Seidel method did not converge")
 
 def gauss_seidel_method():
     window = tk.Toplevel()
     window.title("Gauss-Seidel Method")
-    
+    ttk.Label(window, text="Solve the system of equations:").pack()
+    ttk.Label(window, text="Example:").pack()
+    ttk.Label(window, text="1,1,1 = 9").pack()
+    ttk.Label(window, text="1,0,1 = 3").pack()
+    ttk.Label(window, text="0,1,1 = 7").pack()
+    ttk.Label(window, text="0,0,0").pack()
     matrix_entries = []
     b_entries = []
     for i in range(3):
@@ -139,6 +186,7 @@ def gauss_seidel_method():
 
         matrix_entries.append(row_entry)
         b_entries.append(b_entry)    
+
     ttk.Label(window, text="Enter initial guess (comma-separated):").pack()
     x0_entry = ttk.Entry(window)
     x0_entry.pack()
@@ -159,7 +207,8 @@ def gauss_seidel_method():
 def lu_factorization():
     window = tk.Toplevel()
     window.title("LU Factorization")
-    
+    ttk.Label(window, text="Perform LU factorization on matrix").pack()
+
     ttk.Label(window, text="Enter matrix (comma-separated rows):").pack()
     matrix_entry = tk.Text(window, height=5, width=40)
     matrix_entry.pack()
@@ -181,7 +230,8 @@ def lu_factorization():
 def polynomial_curve_fitting():
     window = tk.Toplevel()
     window.title("Polynomial Curve Fitting")
-    
+    ttk.Label(window, text="Fit a quadratic curve to data points:").pack()
+    ttk.Label(window, text="Example: x(0,1,2,3,4), y(0,1,4,9,16)").pack()
     ttk.Label(window, text="Enter data points (comma-separated x values and y values):").pack()
     x_entry = ttk.Entry(window, width=40)
     x_entry.pack()
@@ -216,8 +266,9 @@ def polynomial_curve_fitting():
 # 6 task
 def lagrange_interpolation():
     window = tk.Toplevel()
-    window.title("Lagrange Interpolation")
-    
+    window.title("Lagrange Interpolation") 
+    ttk.Label(window, text="Estimate f(5.5) given points:").pack()
+    ttk.Label(window, text="Example: Estimate f(5.5) given points: x(5,6,7,8) y(25,36,49,64)").pack()
     ttk.Label(window, text="Enter data points (comma-separated x values and y values):").pack()
     x_entry = ttk.Entry(window, width=40)
     x_entry.pack()
@@ -255,7 +306,7 @@ def lagrange_interpolation():
 def newtons_forward_difference():
     window = tk.Toplevel()
     window.title("Newton's Forward Difference - Second Derivative")
-    
+    ttk.Label(window, text="Example: Given data points x=[5,6,7,8] and y=[25,36,49,64], estimate d²y/dx² at x=1").pack()
     ttk.Label(window, text="Enter x values (comma-separated):").pack()
     x_entry = ttk.Entry(window, width=40)
     x_entry.pack()
@@ -300,16 +351,25 @@ def simpsons_rule():
     window.title("Simpson's Rule Integration")
     
     ttk.Label(window, text="Estimate ∫0π sin(x) dx using Simpson's rule").pack()
+    ttk.Label(window, text="Enter number of subintervals (even number):").pack()
+    
+    entry_n = ttk.Entry(window)
+    entry_n.pack()
     
     def compute_integral():
         try:
-            a, b, n = 0, np.pi, 6  # Fixed limits and subintervals
-            x = np.linspace(a, b, n+1)
+            n = int(entry_n.get())
+            if n % 2 != 0 or n <= 0:
+                messagebox.showerror("Error", "Please enter a positive even number for subintervals.")
+                return
+            
+            a, b = 0, np.pi  # Fixed limits
+            x = np.linspace(a, b, n + 1)
             y = np.sin(x)
             integral = simps(y, x)
             messagebox.showinfo("Integration Result", f"Estimated Integral = {integral}")
-        except:
-            messagebox.showerror("Error", "Calculation error.")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid integer.")
     
     ttk.Button(window, text="Compute Integral", command=compute_integral).pack()
 
