@@ -251,6 +251,67 @@ def lagrange_interpolation():
     
     ttk.Button(window, text="Compute Interpolation", command=interpolate).pack()
 
+# 7 task
+def newtons_forward_difference():
+    window = tk.Toplevel()
+    window.title("Newton's Forward Difference - Second Derivative")
+    
+    ttk.Label(window, text="Enter x values (comma-separated):").pack()
+    x_entry = ttk.Entry(window, width=40)
+    x_entry.pack()
+    
+    ttk.Label(window, text="Enter y values (comma-separated):").pack()
+    y_entry = ttk.Entry(window, width=40)
+    y_entry.pack()
+    
+    ttk.Label(window, text="Enter x value for second derivative:").pack()
+    x_target_entry = ttk.Entry(window, width=20)
+    x_target_entry.pack()
+    
+    def compute_second_derivative():
+        try:
+            x_values = list(map(float, x_entry.get().split(',')))
+            y_values = list(map(float, y_entry.get().split(',')))
+            x_target = float(x_target_entry.get())
+            
+            if len(x_values) != len(y_values) or len(x_values) < 3:
+                raise ValueError("Invalid input. Ensure equal number of x and y values, at least 3 data points required.")
+            
+            h = x_values[1] - x_values[0] 
+            n = len(x_values)
+            
+            forward_diff = np.zeros((n, n))
+            forward_diff[:, 0] = y_values
+            
+            for j in range(1, n):
+                for i in range(n - j):
+                    forward_diff[i, j] = forward_diff[i + 1, j - 1] - forward_diff[i, j - 1]
+            
+            second_derivative = (forward_diff[0, 2]) / (h ** 2)
+            messagebox.showinfo("Second Derivative Result", f"Estimated d²y/dx² at x={x_target} is {second_derivative}")
+        except:
+            messagebox.showerror("Error", "Invalid input format. Please enter valid numerical values.")
+    
+    ttk.Button(window, text="Compute Second Derivative", command=compute_second_derivative).pack()
+
+# 8 task
+def simpsons_rule():
+    window = tk.Toplevel()
+    window.title("Simpson's Rule Integration")
+    
+    ttk.Label(window, text="Estimate ∫0π sin(x) dx using Simpson's rule").pack()
+    
+    def compute_integral():
+        try:
+            a, b, n = 0, np.pi, 6  # Fixed limits and subintervals
+            x = np.linspace(a, b, n+1)
+            y = np.sin(x)
+            integral = simps(y, x)
+            messagebox.showinfo("Integration Result", f"Estimated Integral = {integral}")
+        except:
+            messagebox.showerror("Error", "Calculation error.")
+    
+    ttk.Button(window, text="Compute Integral", command=compute_integral).pack()
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -261,5 +322,7 @@ if __name__ == "__main__":
     ttk.Button(root, text="Task 4: LU Factorization", command=lu_factorization).pack(pady=10)
     ttk.Button(root, text="Task 5: Polynomial Curve Fitting", command=polynomial_curve_fitting).pack(pady=10)
     ttk.Button(root, text="Task 6: Lagrange Interpolation", command=lagrange_interpolation).pack(pady=10)
+    ttk.Button(root, text="Task 7: Newton's Forward Difference", command=newtons_forward_difference).pack(pady=10)
+    ttk.Button(root, text="Task 8: Simpson's Rule", command=simpsons_rule).pack(pady=10)
 
     root.mainloop()
