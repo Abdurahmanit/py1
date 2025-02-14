@@ -155,6 +155,7 @@ def gauss_seidel_method():
     
     ttk.Button(window, text="Solve", command=solve).pack()
 
+# 4 task
 def lu_factorization():
     window = tk.Toplevel()
     window.title("LU Factorization")
@@ -176,6 +177,42 @@ def lu_factorization():
     
     ttk.Button(window, text="Compute LU", command=solve).pack()
 
+# 5 task
+def polynomial_curve_fitting():
+    window = tk.Toplevel()
+    window.title("Polynomial Curve Fitting")
+    
+    ttk.Label(window, text="Enter data points (comma-separated x values and y values):").pack()
+    x_entry = ttk.Entry(window, width=40)
+    x_entry.pack()
+    y_entry = ttk.Entry(window, width=40)
+    y_entry.pack()
+    
+    def solve():
+        try:
+            x_values = list(map(float, x_entry.get().split(',')))
+            y_values = list(map(float, y_entry.get().split(',')))
+            if len(x_values) != len(y_values):
+                raise ValueError("X and Y must have the same length")
+            
+            coefficients = np.polyfit(x_values, y_values, 2)  # Quadratic fit
+            poly_eq = np.poly1d(coefficients)
+            
+            x_plot = np.linspace(min(x_values), max(x_values), 100)
+            y_plot = poly_eq(x_plot)
+            
+            plt.scatter(x_values, y_values, color='red', label='Data Points')
+            plt.plot(x_plot, y_plot, label=f'Fit: {poly_eq}', color='blue')
+            plt.legend()
+            plt.xlabel("X")
+            plt.ylabel("Y")
+            plt.title("Quadratic Curve Fitting")
+            plt.show()
+        except:
+            messagebox.showerror("Error", "Invalid input format. Enter valid numeric values.")
+    
+    ttk.Button(window, text="Compute Fit", command=solve).pack()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -184,5 +221,6 @@ if __name__ == "__main__":
     ttk.Button(root, text="Task 2: Root-Finding Methods", command=compare_methods).pack(pady=10)
     ttk.Button(root, text="Task 3: Gauss-Seidel Method", command=gauss_seidel_method).pack(pady=10)
     ttk.Button(root, text="Task 4: LU Factorization", command=lu_factorization).pack(pady=10)
+    ttk.Button(root, text="Task 5: Polynomial Curve Fitting", command=polynomial_curve_fitting).pack(pady=10)
 
     root.mainloop()
