@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
+from scipy.linalg import lu
 
 def f(x):
     return x**3 - x - 2
@@ -154,10 +155,34 @@ def gauss_seidel_method():
     
     ttk.Button(window, text="Solve", command=solve).pack()
 
+def lu_factorization():
+    window = tk.Toplevel()
+    window.title("LU Factorization")
+    
+    ttk.Label(window, text="Enter matrix (comma-separated rows):").pack()
+    matrix_entry = tk.Text(window, height=5, width=40)
+    matrix_entry.pack()
+    
+    def solve():
+        try:
+            matrix_lines = matrix_entry.get("1.0", "end").strip().split("\n")
+            A = np.array([list(map(float, row.split(','))) for row in matrix_lines])
+            P, L, U = lu(A)
+            
+            result = (f"L:\n{L}\n\nU:\n{U}")
+            messagebox.showinfo("LU Decomposition", result)
+        except:
+            messagebox.showerror("Error", "Invalid matrix format. Enter rows as comma-separated values.")
+    
+    ttk.Button(window, text="Compute LU", command=solve).pack()
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Computational Math Toolkit")
     ttk.Button(root, text="Task 1: Graphical Method", command=graphical_method).pack(pady=10)
     ttk.Button(root, text="Task 2: Root-Finding Methods", command=compare_methods).pack(pady=10)
     ttk.Button(root, text="Task 3: Gauss-Seidel Method", command=gauss_seidel_method).pack(pady=10)
+    ttk.Button(root, text="Task 4: LU Factorization", command=lu_factorization).pack(pady=10)
+
     root.mainloop()
