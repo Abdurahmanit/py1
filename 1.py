@@ -213,6 +213,44 @@ def polynomial_curve_fitting():
     
     ttk.Button(window, text="Compute Fit", command=solve).pack()
 
+# 6 task
+def lagrange_interpolation():
+    window = tk.Toplevel()
+    window.title("Lagrange Interpolation")
+    
+    ttk.Label(window, text="Enter data points (comma-separated x values and y values):").pack()
+    x_entry = ttk.Entry(window, width=40)
+    x_entry.pack()
+    y_entry = ttk.Entry(window, width=40)
+    y_entry.pack()
+    
+    ttk.Label(window, text="Enter x value to estimate:").pack()
+    x_val_entry = ttk.Entry(window, width=20)
+    x_val_entry.pack()
+    
+    def interpolate():
+        try:
+            x_values = list(map(float, x_entry.get().split(',')))
+            y_values = list(map(float, y_entry.get().split(',')))
+            x_target = float(x_val_entry.get())
+            
+            if len(x_values) != len(y_values):
+                raise ValueError("X and Y must have the same length")
+            
+            def lagrange_basis(i, x):
+                term = 1
+                for j in range(len(x_values)):
+                    if i != j:
+                        term *= (x - x_values[j]) / (x_values[i] - x_values[j])
+                return term
+            
+            y_target = sum(y_values[i] * lagrange_basis(i, x_target) for i in range(len(x_values)))
+            messagebox.showinfo("Interpolation Result", f"Estimated f({x_target}) = {y_target}")
+        except:
+            messagebox.showerror("Error", "Invalid input format. Enter valid numeric values.")
+    
+    ttk.Button(window, text="Compute Interpolation", command=interpolate).pack()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -222,5 +260,6 @@ if __name__ == "__main__":
     ttk.Button(root, text="Task 3: Gauss-Seidel Method", command=gauss_seidel_method).pack(pady=10)
     ttk.Button(root, text="Task 4: LU Factorization", command=lu_factorization).pack(pady=10)
     ttk.Button(root, text="Task 5: Polynomial Curve Fitting", command=polynomial_curve_fitting).pack(pady=10)
+    ttk.Button(root, text="Task 6: Lagrange Interpolation", command=lagrange_interpolation).pack(pady=10)
 
     root.mainloop()
