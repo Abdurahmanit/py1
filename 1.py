@@ -160,47 +160,70 @@ def gauss_seidel(A, b, x0, tol=1e-6, max_iterations=100):
     
     raise ValueError("Gauss-Seidel method did not converge")
 
+# 3 task
+
 def gauss_seidel_method():
     window = tk.Toplevel()
     window.title("Gauss-Seidel Method")
-    ttk.Label(window, text="Solve the system of equations:").pack()
-    ttk.Label(window, text="Example:").pack()
-    ttk.Label(window, text="1,1,1 = 9").pack()
-    ttk.Label(window, text="1,0,1 = 3").pack()
-    ttk.Label(window, text="0,1,1 = 7").pack()
-    ttk.Label(window, text="0,0,0").pack()
-    matrix_entries = []
-    b_entries = []
-    for i in range(3):
-        frame = ttk.Frame(window)
-        frame.pack()
+    
+    ttk.Label(window, text="Enter matrix A (rows as comma-separated values):").pack()
+    matrix_entry = tk.Text(window, height=5, width=40)
+    matrix_entry.pack()
 
-        ttk.Label(frame, text=f"Row {i+1}:").pack(side="left")
-        row_entry = ttk.Entry(frame, width=15)
-        row_entry.pack(side="left")
-
-        ttk.Label(frame, text=" = ").pack(side="left")  # Равенство в той же строке
-
-        b_entry = ttk.Entry(frame, width=5)
-        b_entry.pack(side="left")
-
-        matrix_entries.append(row_entry)
-        b_entries.append(b_entry)    
+    ttk.Label(window, text="Enter vector b (comma-separated values):").pack()
+    b_entry = ttk.Entry(window, width=40)
+    b_entry.pack()
 
     ttk.Label(window, text="Enter initial guess (comma-separated):").pack()
-    x0_entry = ttk.Entry(window)
+    x0_entry = ttk.Entry(window, width=40)
     x0_entry.pack()
     
+    def gauss_seidel(A, b, x0, tol=1e-6, max_iter=100):
+        n = len(A)
+        x = np.array(x0, dtype=float)
+        
+        for k in range(max_iter):
+            x_new = np.copy(x)
+            for i in range(n):
+                s1 = sum(A[i][j] * x_new[j] for j in range(i))
+                s2 = sum(A[i][j] * x[j] for j in range(i + 1, n))
+                x_new[i] = (b[i] - s1 - s2) / A[i][i]
+            
+            if np.linalg.norm(x_new - x, ord=np.inf) < tol:
+                return x_new, k + 1
+            x = x_new
+        
+        return x, max_iter
+
     def solve():
         try:
-            A = np.array([list(map(float, row.get().split(','))) for row in matrix_entries])
-            b = np.array([float(entry.get()) for entry in b_entries])
+            # Читаем матрицу A
+            matrix_lines = matrix_entry.get("1.0", "end").strip().split("\n")
+            A = np.array([list(map(float, row.split(','))) for row in matrix_lines])
+
+            # Читаем вектор b
+            b = np.array(list(map(float, b_entry.get().split(','))))
+
+            # Читаем начальное приближение
             x0 = np.array(list(map(float, x0_entry.get().split(','))))
+
+            # Проверка размерности
+            if A.shape[0] != A.shape[1]:
+                raise ValueError("Matrix A must be square (n×n).")
+            if A.shape[0] != len(b):
+                raise ValueError("Vector b must have the same length as matrix A.")
+            if len(x0) != len(b):
+                raise ValueError("Initial guess x0 must have the same length as vector b.")
+
+            # Решаем систему
             x, iterations = gauss_seidel(A, b, x0)
             messagebox.showinfo("Solution", f"Solution: {x}\nIterations: {iterations}")
-        except:
-            messagebox.showerror("Error", "Invalid input format.")
-    
+
+        except ValueError as e:
+            messagebox.showerror("Error", str(e))
+        except Exception:
+            messagebox.showerror("Error", "Invalid input format. Please check your inputs.")
+
     ttk.Button(window, text="Solve", command=solve).pack()
 
 # 4 task
