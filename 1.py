@@ -49,6 +49,7 @@ def gauss_seidel(A, b, x0, tol=1e-6, max_iter=100):
         x = x_new
     return x, max_iter
 
+# 1 task
 def graphical_method():
     window = tk.Toplevel()
     window.title("Graphical Method and Absolute Error")
@@ -86,6 +87,7 @@ def graphical_method():
     ttk.Button(window, text="Plot", command=plot).pack()
     ttk.Button(window, text="Calculate Error", command=calculate_error).pack()
 
+# 2 task
 def compare_methods():
     window = tk.Toplevel()
     window.title("Comparison of Root-Finding Methods")
@@ -161,7 +163,6 @@ def gauss_seidel(A, b, x0, tol=1e-6, max_iterations=100):
     raise ValueError("Gauss-Seidel method did not converge")
 
 # 3 task
-
 def gauss_seidel_method():
     window = tk.Toplevel()
     window.title("Gauss-Seidel Method")
